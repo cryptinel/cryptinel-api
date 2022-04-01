@@ -11,6 +11,7 @@ You may utilize some cloud service to host the app, like AWS, Azure or GCloud, b
 You must follow the instructions below
 
 1) Clone the repository typing on terminal `git clone git@bitbucket.org:brunolnetto/scrooge.git`;
+
 2) Run the commands:
     
     2.1. `npm install`: install local dependencies;
@@ -18,6 +19,7 @@ You must follow the instructions below
     2.2. `npm start`: run the server locally;
 
 3) Open a browser;
+
 4) Type `localhost:8080` on the URL field;
 
 
