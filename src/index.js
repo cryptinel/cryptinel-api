@@ -1,20 +1,30 @@
 // [START app]
 import express from 'express';
 
+import 'lodash.combinations';
 import _ from 'lodash';
 
 import fs from 'fs'
 
-import { objectFilter } from 'dot-quiver/utils/objects/objects.js';
+import Graph from 'dot-quiver/data-structures/graph/Graph.js'
+import GraphEdge from 'dot-quiver/data-structures/graph/GraphEdge.js'
 
-import { 
-	saveJSONtoFile
-} from 'dot-quiver/utils/json_utils/json_utils.js';
+import {
+	createVertices
+} from 'dot-quiver/data-structures/graph/utils/graph.js'
+
+import {
+	objectReduce, objectFilter
+} from 'dot-quiver/utils/objects/objects.js'
 
 import {
 	getCurrenciesAsync,
 	getCurrencyRatesAsync
 } from './broker/axios_broker.js'
+
+import {
+	dateStringToFilename
+} from './utils/time.js'
 
 const app = express();
 
