@@ -48,4 +48,6 @@ Thumbs.db
 *.mov
 *.wmv
 
+*.json
+
 node_modules
