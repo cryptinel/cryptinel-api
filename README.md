@@ -1,29 +1,26 @@
-# README #
-
-This README would normally document whatever steps are necessary to get your application up and running.
+# Scrooge #
 
 ### What is this repository for? ###
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+* Financial research
 
 ### How do I get set up? ###
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+You may utilize some cloud service to host the app, like AWS, Azure or GCloud, but in this case you might run locally.
 
-### Contribution guidelines ###
+You must follow the instructions below
 
-* Writing tests
-* Code review
-* Other guidelines
+1) Clone the repository typing on terminal `git clone git@bitbucket.org:brunolnetto/scrooge.git`;
+2) Run the commands:
+    
+    2.1. `npm install`: install local dependencies;
+    
+    2.2. `npm start`: run the server locally;
+
+3) Open a browser;
+4) Type `localhost:8080` on the URL field;
+
 
 ### Who do I talk to? ###
 
-* Repo owner or admin
-* Other community or team contact
+* brunolnetto@gmail.com
