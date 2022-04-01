@@ -3,11 +3,13 @@ import express from 'express';
 
 import _ from 'lodash';
 
+import fs from 'fs'
+
 import { objectFilter } from 'dot-quiver/utils/objects/objects.js';
 
-import Graph from 'dot-quiver/data-structures/graph/Graph.js';
-import { createVertices } from 'dot-quiver/data-structures/graph/utils/graph.js';
-import { createEdges } from 'dot-quiver/data-structures/graph/utils/graph.js';
+import { 
+	saveJSONtoFile
+} from 'dot-quiver/utils/json_utils/json_utils.js';
 
 import {
 	getCurrenciesAsync,
@@ -28,8 +30,20 @@ app.listen(PORT, () => {
   console.log(`Listening on port: ${PORT}`);
 });
 
-const printResult = result => {
-	console.log(result)
+const saveCurrencies = currencies => {
+	// convert JSON object to string
+	const json_str = JSON.stringify(currencies.data, null, 2);
+	
+	// write JSON string to a file
+	fs.writeFile('src/assets/currencies.json', json_str, (err) => {
+	  if (err) {
+		throw err;
+	  }
+  
+	  console.log('JSON data is saved.');
+	});
+
+	saveJSONtoFile('assets', currencies.data, 'currencies')
 }
 
 const getCurrencyRates = result => {
@@ -63,13 +77,18 @@ const getCurrencyRates = result => {
 	
 }
 
+const Currencies = callback => {
+	getCurrenciesAsync(callback)
+}
+
 const CurrencyRates = callback => {
 	getCurrencyRatesAsync('eur', callback)
-}	
+}
 
 // Driver program - Create a sample graph
 app.get('/', (req, res) => {
-	//CurrencyRates(getCurrencyRates)
+	// CurrencyRates(getCurrencyRates)
+	CurrencyRates(saveCurrencies)
 	
 	res.send('HI')
 });
