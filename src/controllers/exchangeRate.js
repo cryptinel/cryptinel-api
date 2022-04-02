@@ -1,7 +1,9 @@
 import fs from 'fs'
 
+import _ from 'lodash'
+
 import {
-	getCurrencyRatesAsync
+	CurrencyRatesAsync
 } from '../axios/axios_broker.js'
 
 import {

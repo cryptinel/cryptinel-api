@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import date from 'date-and-time';
 
 import {
   fillLeftWithToken
@@ -17,3 +18,8 @@ export const dateStringToFilename = (date_) => {
   
   return `${year}-${month}-${day}`;
 };
+
+export const today = () => {
+  const now = new Date();
+  return date.format(now, 'YYYY-MM-DD');
+}
