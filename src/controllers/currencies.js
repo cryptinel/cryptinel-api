@@ -1,5 +1,5 @@
 import {
-	getCurrenciesAsync,
+	CurrenciesAsync,
 } from '../axios/axios_broker.js'
 
 import {
@@ -8,8 +8,16 @@ import {
 
 import fs from 'fs'
 
-export const onCurrencies = callback => {
-	getCurrenciesAsync(callback)
+export const onCurrencies = async (callback) => {
+	return await CurrenciesAsync(callback)
+}
+
+export const logCurrenciesCallback = (currencies_raw) => {
+	console.log(currencies_raw.data)
+}
+
+export const getCurrencies = (currencies_raw) => {
+	return currencies_raw.data
 }
 
 export const saveCurrencies = (currencies_raw) => {

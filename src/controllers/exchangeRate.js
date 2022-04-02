@@ -12,8 +12,62 @@ import {
 	saveFileTo
 } from '../utils/file.js'
 
+import date from 'date-and-time'
+
 export const onCurrencyRates = (base_currency, callback) => {
-	getCurrencyRatesAsync(base_currency, callback)
+	CurrencyRatesAsync(base_currency, callback)
+}
+
+export const onCurrencyRatesHistory = async (base_currency, to_currency, from_date, to_date, callback) => {
+	let from_date_ = date.parse(from_date, 'YYYY-MM-DD');
+	let to_date_ = date.parse(to_date, 'YYYY-MM-DD');
+	
+	let today_ = new Date()
+
+	let today_from_diff = date.subtract(today_, from_date_).toDays()
+	let today_to_diff = date.subtract(today_, to_date_).toDays()
+	
+	let day_diff = date.subtract(to_date_, from_date_).toDays()
+	
+	let curr_date = {}
+	let curr_date_str = {}
+	
+	let currencies = {}
+	
+	let history = {} 
+	let today_rate = 1 
+
+	if(day_diff <= 0) {
+		throw Error('Number of days between requests must be greater to zero !')
+	}
+	
+	if(today_to_diff < 0 || today_from_diff < 0) {
+		throw Error('The from- and to-dates must be before today !')
+	}
+
+	for (let day_incr = 0; day_incr <= day_diff; day_incr += 1) {
+		curr_date = date.addDays(from_date_, day_incr);
+		curr_date_str = date.format(curr_date, 'YYYY-MM-DD'),
+
+		currencies = await CurrencyRatesAsync(
+			base_currency, getCurrencyRatesCallback, curr_date_str
+		)
+		
+		history[
+			date.format(curr_date, 'YYYY-MM-DD')
+		] = currencies['exchange_rates'][to_currency]
+	}
+
+	callback(
+		{
+			base_currency: base_currency,
+			history: history
+		}
+	)
+}
+
+export const logCurrenciesRatesCallback = (currency_rates_raw) => {
+	console.log(currency_rates_raw.data)
 }
 
 export const saveCurrencyRatesCallback = (currency_rates_raw) => {
