@@ -1,4 +1,4 @@
-# Scrooge #
+# Almsgiver #
 
 ### What is this repository for? ###
 
