@@ -14,14 +14,35 @@ import {
 	saveFileTo
 } from '../utils/file.js'
 
+import {
+	fillLeftWithToken
+} from '../utils/string.js'
+
+import {
+	lastMonthDay
+} from '../utils/time.js'
+
+import {
+	median,
+} from '../utils/math.js'
+
+import {
+	objectKeyFind,
+} from 'dot-quiver/utils/objects/objects.js'
+
 import date from 'date-and-time'
 
 export const onCurrencyRates = (base_currency, callback) => {
 	CurrencyRatesAsync(base_currency, callback)
 }
 
-export const onCurrencyRatesHistory = async (base_currency, to_currency, from_date, to_date, callback) => {
-	let from_date_ = date.parse(from_date, 'YYYY-MM-DD');
+export const onCurrencyRatesHistory = async (
+		base_currency, to_currency, 
+		from_date, to_date, 
+		callback
+	) => {
+	
+		let from_date_ = date.parse(from_date, 'YYYY-MM-DD');
 	let to_date_ = date.parse(to_date, 'YYYY-MM-DD');
 	
 	let today_ = new Date()
@@ -60,12 +81,60 @@ export const onCurrencyRatesHistory = async (base_currency, to_currency, from_da
 		] = currencies['exchange_rates'][to_currency]
 	}
 
-	callback(
+	return callback(
 		{
-			base_currency: base_currency,
+			from_currency: base_currency,
+			to_currency: to_currency,
 			history: history
 		}
 	)
+}
+
+export const onYearMonthCurrencyRatesHistory = async (
+		base_currency, to_currency, 
+		month, year, 
+		callback
+	) => {
+	
+	const day = lastMonthDay(month, year)
+	month = fillLeftWithToken(`${month}`, 2, '0');
+	year = fillLeftWithToken(`${year}`, 2, '0');
+
+	const from_date_str = `${year}-${month}-01`;
+	const to_date_str = `${year}-${month}-${day}`;
+	
+	return await onCurrencyRatesHistory(
+		base_currency, to_currency, 
+		from_date_str, to_date_str, 
+		callback
+		)
+}
+
+export const getHistoryStatsCallback = (history_info) => {
+	const rates = Object.values(history_info['history']);
+	
+	const median_val = median(rates);
+	
+	const min_val = Math.min(...rates);
+	const max_val = Math.max(...rates);
+	
+	const min_key = objectKeyFind(
+		history_info['history'],
+		(date, rate) => rate === min_val
+	)[0]
+
+	const max_key = objectKeyFind(
+		history_info['history'],
+		(date, rate) => rate === max_val
+	)[0]
+
+	return {
+		median: median_val,
+		min_date: min_key,
+		min_val: min_val,
+		max_date: max_key,
+		max_val: max_val,
+	}
 }
 
 export const logCurrenciesRatesCallback = (currency_rates_raw) => {
@@ -73,6 +142,7 @@ export const logCurrenciesRatesCallback = (currency_rates_raw) => {
 }
 
 export const saveCurrencyRatesCallback = (currency_rates_raw) => {
+	
 	const folder_name = `${extractHeaderDate(currency_rates_raw)}`;
 	
 	const file_root_path = `src/assets/${folder_name}`;
@@ -87,7 +157,7 @@ export const saveCurrencyRatesCallback = (currency_rates_raw) => {
 	}
 }
 
-export const getCurrencyRatesCallback = payload => {
+export const getCurrencyRatesCallback = (payload) => {
 	const exchange_obj = payload.data
 	const base_currency = _.difference(Object.keys(exchange_obj), ['date'])[0]
 	const exchange_rates = exchange_obj[base_currency]
