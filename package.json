@@ -1,5 +1,5 @@
 {
-  "name": "scrooge",
+  "name": "almsgiver",
   "type": "module",
   "description": "Package to research currencies",
   "main": "./src/index.js",
