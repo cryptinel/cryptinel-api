@@ -7,6 +7,10 @@ import {
 
 export const toTimestamp = (strDate) => Date.parse(strDate);
 
+export const lastMonthDay = (month, year) => {
+   return new Date(year, month + 1, 0).getDate();
+}
+
 export const dateStringToFilename = (date_) => {
   const date__ = new Date(toTimestamp(date_.toString()));
   const year = date__.getFullYear();
