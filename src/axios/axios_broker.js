@@ -35,7 +35,6 @@ const getRequest = async (url, callback, headers = {}) => {
       return callback(res);
     })
     .catch((error) => {
-      console.log('This is milestone 1.')
       handleError(error);
     });
 };
