@@ -28,6 +28,7 @@ import {
 
 import {
 	objectKeyFind,
+	objectReduce
 } from 'dot-quiver/utils/objects/objects.js'
 
 import date from 'date-and-time'
@@ -90,6 +91,8 @@ export const onCurrencyRatesHistory = async (
 	)
 }
 
+export const getCurrencyRatesHistory = (history) => history
+
 export const onYearMonthCurrencyRatesHistory = async (
 		base_currency, to_currency, 
 		month, year, 
@@ -135,6 +138,65 @@ export const getHistoryStatsCallback = (history_info) => {
 		max_date: max_key,
 		max_val: max_val,
 	}
+}
+
+export const getExchangeHistoryProfit = (history) => {
+	const history_currency_rates = Object.values(history['history']);
+	const history_currency_dates = Object.keys(history['history']);
+	
+	let profit_rates = [];
+
+	let history_currency_date = '';
+
+	let min_profit_rate = 0;
+	let max_profit_rate = 0;
+
+	let min_profit_rate_date = -1;
+	let max_profit_rate_date = -1;
+
+	return objectReduce(
+		history_currency_rates,
+		(
+			result, 
+			buy_currency_id,
+			 buy_currency
+		) => {
+
+			buy_currency_id = Number(buy_currency_id)
+			history_currency_date = history_currency_dates[buy_currency_id]
+			
+			profit_rates = history_currency_rates.slice(
+				buy_currency_id + 1
+			).map(
+				(sell_currency) => getExchangeProfit(buy_currency, sell_currency)
+			)
+			
+			min_profit_rate = Math.min(...profit_rates);
+			max_profit_rate = Math.max(...profit_rates);
+			
+			min_profit_rate_date = history_currency_dates[
+				buy_currency_id + profit_rates.indexOf(min_profit_rate)
+			];
+
+			max_profit_rate_date = history_currency_dates[
+				buy_currency_id + profit_rates.indexOf(max_profit_rate)
+			];
+			
+			result[history_currency_date] = {
+				min_profit_rate: min_profit_rate,
+				min_profit_rate_date: min_profit_rate_date,
+				max_profit_rate: max_profit_rate,
+				max_profit_rate_date: max_profit_rate_date,	
+			}
+
+			return result
+		}, {}
+	)
+	
+}
+
+export const getExchangeProfit = (buy_currency, sell_currency) => {
+	return 1 - (sell_currency/buy_currency)
 }
 
 export const logCurrenciesRatesCallback = (currency_rates_raw) => {
