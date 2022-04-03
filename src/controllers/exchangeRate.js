@@ -100,18 +100,20 @@ export const onYearMonthCurrencyRatesHistory = async (
 	callback
 ) => {
 
-const last_month_day = lastMonthDay(month-1, year)
-month = fillLeftWithToken(`${month}`, 2, '0');
-year = fillLeftWithToken(`${year}`, 2, '0');
+	const last_month_day = lastMonthDay(month-1, year)
+	month = fillLeftWithToken(`${month}`, 2, '0');
+	year = fillLeftWithToken(`${year}`, 2, '0');
 
-const from_date_str = `${year}-${month}-01`;
-const to_date_str = `${year}-${month}-${last_month_day}`;
+	const from_date_str = `${year}-${month}-01`;
+	const to_date_str = `${year}-${month}-${last_month_day}`;
 
-return await onCurrencyRatesHistory(
-	base_currency, to_currency, 
-	from_date_str, to_date_str, 
-	callback
-	)
+	const history = await onCurrencyRatesHistory(
+		base_currency, to_currency, 
+		from_date_str, to_date_str, 
+		callback
+		)
+
+	return history
 }
 
 export const onYearCurrencyRatesHistory = async (
@@ -125,7 +127,7 @@ export const onYearCurrencyRatesHistory = async (
 			base_currency, to_currency, month, year, 
 			getCurrencyRatesHistory
 		)
-
+		
 		history = {...history, ...history_aux['history']}
 	}
 	
