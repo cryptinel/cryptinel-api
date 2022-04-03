@@ -40,7 +40,7 @@ const getRequest = async (url, callback, headers = {}) => {
 };
 
 export const CurrenciesAsync = async (callback, date_ = 'latest') => {
-  const response = await getRequest(`${BASE_URL}/${date_}/currencies.json`, callback);
+  return await getRequest(`${BASE_URL}/${date_}/currencies.json`, callback);
 };
 
 export const CurrencyRatesAsync = async (base_currency, callback, date_ = 'latest') => {
