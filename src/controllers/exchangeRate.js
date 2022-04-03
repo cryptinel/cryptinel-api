@@ -95,23 +95,47 @@ export const onCurrencyRatesHistory = async (
 export const getCurrencyRatesHistory = (history) => history
 
 export const onYearMonthCurrencyRatesHistory = async (
-		base_currency, to_currency, 
-		month, year, 
-		callback
-	) => {
-	
-	const day = lastMonthDay(month, year)
-	month = fillLeftWithToken(`${month}`, 2, '0');
-	year = fillLeftWithToken(`${year}`, 2, '0');
+	base_currency, to_currency, 
+	month, year, 
+	callback
+) => {
 
-	const from_date_str = `${year}-${month}-01`;
-	const to_date_str = `${year}-${month}-${day}`;
+const last_month_day = lastMonthDay(month-1, year)
+month = fillLeftWithToken(`${month}`, 2, '0');
+year = fillLeftWithToken(`${year}`, 2, '0');
+
+const from_date_str = `${year}-${month}-01`;
+const to_date_str = `${year}-${month}-${last_month_day}`;
+
+return await onCurrencyRatesHistory(
+	base_currency, to_currency, 
+	from_date_str, to_date_str, 
+	callback
+	)
+}
+
+export const onYearCurrencyRatesHistory = async (
+	base_currency, to_currency, year, callback
+) => {
+	let history = {}
+	let history_aux = {}
 	
-	return await onCurrencyRatesHistory(
-		base_currency, to_currency, 
-		from_date_str, to_date_str, 
-		callback
+	for(let month of _.range(1, 13)) {
+		history_aux = await onYearMonthCurrencyRatesHistory(
+			base_currency, to_currency, month, year, 
+			getCurrencyRatesHistory
 		)
+
+		history = {...history, ...history_aux['history']}
+	}
+	
+	return callback(
+		{
+			from_currency: base_currency,
+			to_currency: to_currency,
+			history: history
+		}
+	)
 }
 
 export const getHistoryStatsCallback = (history_info) => {
@@ -152,52 +176,94 @@ export const getExchangeHistoryProfit = (history) => {
 	let min_profit_rate = 0;
 	let max_profit_rate = 0;
 
-	let min_profit_rate_date = -1;
-	let max_profit_rate_date = -1;
+	let min_profit_exchange_date = -1;
+	let max_profit_exchange_date = -1;
 
 	return objectReduce(
 		history_currency_rates,
 		(
 			result, 
 			buy_currency_id,
-			 buy_currency
+			buy_currency
 		) => {
 
 			buy_currency_id = Number(buy_currency_id)
-			history_currency_date = history_currency_dates[buy_currency_id]
 			
-			profit_rates = history_currency_rates.slice(
-				buy_currency_id + 1
-			).map(
-				(sell_currency) => getExchangeProfit(buy_currency, sell_currency)
-			)
+			if(buy_currency_id !== history_currency_rates.length-1) {
+				history_currency_date = history_currency_dates[buy_currency_id]
 			
-			min_profit_rate = Math.min(...profit_rates);
-			max_profit_rate = Math.max(...profit_rates);
-			
-			min_profit_rate_date = history_currency_dates[
-				buy_currency_id + profit_rates.indexOf(min_profit_rate)
-			];
+				profit_rates = history_currency_rates.slice(
+					buy_currency_id + 1
+				).map(
+					(sell_currency) => getExchangeProfit(buy_currency, sell_currency)
+				)
+				
+				min_profit_rate = Math.min(...profit_rates);
+				max_profit_rate = Math.max(...profit_rates);
+				
+				min_profit_exchange_date = history_currency_dates[
+					buy_currency_id + profit_rates.indexOf(min_profit_rate) + 1
+				];
 
-			max_profit_rate_date = history_currency_dates[
-				buy_currency_id + profit_rates.indexOf(max_profit_rate)
-			];
-			
-			result[history_currency_date] = {
-				min_profit_rate: min_profit_rate,
-				min_profit_rate_date: min_profit_rate_date,
-				max_profit_rate: max_profit_rate,
-				max_profit_rate_date: max_profit_rate_date,	
+				max_profit_exchange_date = history_currency_dates[
+					buy_currency_id + profit_rates.indexOf(max_profit_rate) + 1
+				];
+				
+				result[history_currency_date] = {
+					min_profit_rate: min_profit_rate,
+					min_profit_exchange_date: min_profit_exchange_date,
+					max_profit_rate: max_profit_rate,
+					max_profit_exchange_date: max_profit_exchange_date,	
+				}
 			}
 
 			return result
 		}, {}
 	)
+}
+
+export const getWorstBestExchangeHistoryProfit = (history) => {
+	const profit_history = getExchangeHistoryProfit(history);
+	const profit_history_dates = Object.keys(profit_history);
+
+	const min_profit_rates = objectReduce(
+		profit_history,
+		(result, base_date, profit_info) => {
+			result.push(profit_info['max_profit_rate'])
+			
+			return result
+		}, []
+	)
 	
+	const min_min_profit_rate = Math.min(...min_profit_rates);
+	const min_min_profit_rate_id = min_profit_rates.indexOf(min_min_profit_rate);
+	const min_profit_base_date = profit_history_dates[min_min_profit_rate_id];
+	
+	const max_profit_rates = objectReduce(
+		profit_history,
+		(result, base_date, profit_info) => {
+			result.push(profit_info['max_profit_rate'])
+			
+			return result
+		}, []
+	)
+	
+	const max_max_profit_rate = Math.max(...max_profit_rates);
+	const max_max_profit_rate_id = max_profit_rates.indexOf(max_max_profit_rate);
+	const max_profit_base_date = profit_history_dates[max_max_profit_rate_id];
+	
+	return {
+		'min_min_profit_base_date': min_profit_base_date,
+		'min_min_profit_rate': min_min_profit_rate,
+		'min_min_exchange_rate': profit_history[min_profit_base_date]['min_profit_exchange_date'],
+		'max_profit_base_date': max_profit_base_date,
+		'max_max_profit_date': max_max_profit_rate,
+		'max_max_exchange_date': profit_history[max_profit_base_date]['max_profit_exchange_date'],
+	}
 }
 
 export const getExchangeProfit = (buy_currency, sell_currency) => {
-	return 1 - (sell_currency/buy_currency)
+	return (sell_currency/buy_currency) - 1
 }
 
 export const logCurrenciesRatesCallback = (currency_rates_raw) => {
@@ -212,7 +278,7 @@ export const saveCurrencyRatesCallback = (currency_rates_raw) => {
 
 	const file_name = 'currency_rates';
 	const content = JSON.stringify(currency_rates_raw.data, null, 2);
-	console.log(file_root_path)
+	
 	try {
 		fs.mkdirSync(file_root_path);
 	} catch(ignore) {} finally {
