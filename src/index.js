@@ -4,23 +4,17 @@ import express from 'express';
 import 'lodash.combinations';
 import _ from 'lodash';
 
-import date from 'date-and-time';
-
 import {
-	onCurrencies,
-	getCurrencies,
-	logCurrenciesCallback,
-} from './controllers/currencies.js'
-
-import {
-	onCurrencyRates,
-	onCurrencyRatesHistory,
-	saveCurrencyRatesCallback,
+	onYearMonthCurrencyRatesHistory,
+	getWorstBestExchangeHistoryProfit,
+	onYearCurrencyRatesHistory,
+	getCurrencyRatesHistory
 } from './controllers/exchangeRate.js'
 
 import {
-	today,
-} from './utils/time.js'
+	onCurrencies,
+	getCurrencies
+} from './controllers/currencies.js'
 
 const app = express();
 
@@ -38,9 +32,23 @@ app.listen(PORT, () => {
 
 // Driver program - Create a sample graph
 app.get('/', async (req, res) => {
-	onCurrencyRatesHistory('eur', 'brl', '2022-01-01', '2022-04-01', console.log)
+	const currencies = await onCurrencies(getCurrencies);
+	let year_stats = {};
+	let month_stats = {};
+	
+	const year = 2021;
+	
+	for (let month = 1; month <= 12; month += 1) {
+		month_stats = await onYearMonthCurrencyRatesHistory(
+			'btc', 'brl', month, year, getWorstBestExchangeHistoryProfit
+		)
 		
-	res.send('Hi!')
+		console.log(month_stats)
+
+		year_stats[`${year}-${month}`] = month_stats
+	}
+	
+	res.send(year_stats)
 });
 // [END app]
 
