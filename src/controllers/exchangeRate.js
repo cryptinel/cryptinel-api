@@ -43,7 +43,7 @@ export const onCurrencyRatesHistory = async (
 		callback
 	) => {
 	
-		let from_date_ = date.parse(from_date, 'YYYY-MM-DD');
+	let from_date_ = date.parse(from_date, 'YYYY-MM-DD');
 	let to_date_ = date.parse(to_date, 'YYYY-MM-DD');
 	
 	let today_ = new Date()
@@ -58,8 +58,7 @@ export const onCurrencyRatesHistory = async (
 	
 	let currencies = {}
 	
-	let history = {} 
-	let today_rate = 1 
+	let history = {}
 
 	if(day_diff <= 0) {
 		throw Error('Number of days between requests must be greater to zero !')
@@ -77,9 +76,11 @@ export const onCurrencyRatesHistory = async (
 			base_currency, getCurrencyRatesCallback, curr_date_str
 		)
 		
-		history[
-			date.format(curr_date, 'YYYY-MM-DD')
-		] = currencies['exchange_rates'][to_currency]
+		if(currencies !== undefined) {
+			history[
+				date.format(curr_date, 'YYYY-MM-DD')
+			] = currencies['exchange_rates'][to_currency]
+		}
 	}
 
 	return callback(
