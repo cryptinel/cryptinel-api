@@ -6,6 +6,10 @@ export const extractHeaderDate = (payload) => {
 	return dateStringToFilename(`${payload.headers['date']}`);
 }
 
+export const getCallableCryptoSymbols = () => {
+	return ['btc', 'eth', 'ltc', 'bch']
+}
+
 export const getCryptoSymbols = () => {
 	return [
 		'btc', 'eth', 'wbtc', 'usdt', 'bnb', 'sol', 

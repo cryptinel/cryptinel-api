@@ -33,8 +33,8 @@ import {
 
 import date from 'date-and-time'
 
-export const onCurrencyRates = (base_currency, callback) => {
-	CurrencyRatesAsync(base_currency, callback)
+export const onCurrencyRates = (base_currency, callback, date_str = 'latest') => {
+	CurrencyRatesAsync(base_currency, callback, date_str)
 }
 
 export const onCurrencyRatesHistory = async (

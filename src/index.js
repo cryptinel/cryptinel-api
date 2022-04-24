@@ -5,16 +5,28 @@ import 'lodash.combinations';
 import _ from 'lodash';
 
 import {
+	onCurrencyRatesHistory,
 	onYearMonthCurrencyRatesHistory,
 	getWorstBestExchangeHistoryProfit,
 	onYearCurrencyRatesHistory,
-	getCurrencyRatesHistory
+	onCurrencyRates,
+	logCurrenciesRatesCallback,
+	getCurrencyRatesHistory, 
+	getExchangeHistoryProfit
 } from './controllers/exchangeRate.js'
 
 import {
 	onCurrencies,
 	getCurrencies
 } from './controllers/currencies.js'
+
+import {
+	getCallableCryptoSymbols
+} from './utils/currency.js'
+
+import {
+	today
+} from './utils/time.js'
 
 const app = express();
 
@@ -33,22 +45,50 @@ app.listen(PORT, () => {
 // Driver program - Create a sample graph
 app.get('/', async (req, res) => {
 	const currencies = await onCurrencies(getCurrencies);
-	let year_stats = {};
+	const crypto_symbs = getCallableCryptoSymbols();
+
+	let crypto_stats = {};
 	let month_stats = {};
-	
+
+	const month = 2;
 	const year = 2021;
+
+	let date_key = '';
 	
-	for (let month = 1; month <= 12; month += 1) {
-		month_stats = await onYearMonthCurrencyRatesHistory(
-			'btc', 'brl', month, year, getWorstBestExchangeHistoryProfit
+	/*
+	onCurrencyRates(
+		'ada', 
+		logCurrenciesRatesCallback, 
+		'2021-09-15')
+	*/
+	
+	const profit_history = await onCurrencyRatesHistory(
+		'ada', 'brl', 
+		'2021-09-16', today(), 
+		getExchangeHistoryProfit
+	)
+	
+	console.log(profit_history)
+
+	/*
+	for(const crypto_symb of crypto_symbs) {
+		month_stats = await onYearCurrencyRatesHistory(
+			`${crypto_symb}`, 'brl', year, getWorstBestExchangeHistoryProfit
 		)
 		
+		console.log(`crypto symbol: ${crypto_symb}`)
 		console.log(month_stats)
-
-		year_stats[`${year}-${month}`] = month_stats
+		
+		date_key = `${year}-${month}`;
+		
+		crypto_stats[crypto_symb] = {
+			date: date_key,
+			month_stats: month_stats
+		} 
 	}
-	
-	res.send(year_stats)
+	*/
+
+	res.send(crypto_stats)
 });
 // [END app]
 
