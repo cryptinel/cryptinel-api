@@ -10,7 +10,7 @@ You may utilize some cloud service to host the app, like AWS, Azure or GCloud, b
 
 You must follow the instructions below
 
-1) Clone the repository typing on terminal `git clone git@bitbucket.org:brunolnetto/cryptency.git`;
+1) Clone the repository typing on terminal `git clone git@github.com:cryptinel/cryptinel-api.git`;
 
 2) Run the commands:
     
